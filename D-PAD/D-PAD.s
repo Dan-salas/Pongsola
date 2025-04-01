@@ -9,16 +9,16 @@ li s0, 0    # Fila (Y) del primer píxel
 li s1, 2    # Columna (X) del primer píxel
 
 # Color del píxel (Formato RGB 24 bits: 0xRRGGBB)
-li s2, 0xFF0000   # Rojo (0xFF0000 = RGB(255,0,0))
-li s3, 0x000000   # Color de apagado (negro) 0x000000 = RGB(0,0,0)
+li s2, 0xFF0000   # Rojo 
+li s3, 0x000000   # Color de apagado (negro) 
 
 # Bucle infinito
 loop:
     # Leer estado del D-PAD
-    lw t0, D_PAD_0_DOWN   # Botón "Abajo"
-    lw t1, D_PAD_0_UP     # Botón "Arriba"
-    lw t3, D_PAD_0_LEFT   # Botón "Izquierda"
-    lw t4, D_PAD_0_RIGHT  # Botón "Derecha"
+    lw t0, D_PAD_0_DOWN   # Botón Abajo
+    lw t1, D_PAD_0_UP     # Botón Arriba
+    lw t3, D_PAD_0_LEFT   # Botón Izquierda
+    lw t4, D_PAD_0_RIGHT  # Botón Derecha
 
     # Movimiento en función de los botones presionados
     bnez t0, moveDown     
@@ -30,7 +30,7 @@ loop:
     j loop
 
 moveDown:
-    # Borrar la posición anterior (color negro)
+    # Borrar la posición anterior 
     jal erasePixel  
     addi s0, s0, 1   # Mover hacia abajo
     bge s0, a2, resetPos  # Verificar límites
