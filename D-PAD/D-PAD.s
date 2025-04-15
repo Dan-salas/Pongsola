@@ -1,33 +1,33 @@
-# Código de dibujo de píxel con movimiento usando el D-PAD
+# CÃ³digo de dibujo de pÃ­xel con movimiento usando el D-PAD
 
-li a0, LED_MATRIX_0_BASE   # Dirección base de la matriz de LEDs
+li a0, LED_MATRIX_0_BASE   # DirecciÃ³n base de la matriz de LEDs
 li a1, LED_MATRIX_0_WIDTH  # Ancho de la matriz
 li a2, LED_MATRIX_0_HEIGHT # Alto de la matriz
 
-# Primera posición del píxel (manejada con Up/Down)
-li s0, 0    # Fila (Y) del primer píxel
-li s1, 0    # Columna (X) del primer píxel
+# Primera posiciÃ³n del pÃ­xel 
+li s0, 0    # Fila (Y) del primer pÃ­xel
+li s1, 0    # Columna (X) del primer pÃ­xel
 
-# Segunda posición del píxel (manejada con Left/Right)
-li s4, 0    # Fila (Y) del segundo píxel
-li s5, 33    # Columna (X) del segundo píxel
+# Segunda posiciÃ³n del pÃ­xel 
+li s4, 0    # Fila (Y) del segundo pÃ­xel
+li s5, 34    # Columna (X) del segundo pÃ­xel
 
-# Color del píxel (Formato RGB 24 bits: 0xRRGGBB)
-li s2, 0xFF0000   # Rojo (0xFF0000 = RGB(255,0,0))
+# Color del pÃ­xel 
+li s2, 0xFFC100   # Rojo (0xFF0000 = RGB(255,0,0))
 li s3, 0x000000   # Color de apagado (negro) 0x000000 = RGB(0,0,0)
 
 # Bucle infinito
 loop:
     # Leer estado del D-PAD
-    lw t0, D_PAD_0_DOWN   # Botón "Abajo" (afecta s0, s1)
-    lw t1, D_PAD_0_UP     # Botón "Arriba" (afecta s0, s1)
-    lw t3, D_PAD_0_LEFT   # Botón "Izquierda" (afecta s4, s5)
-    lw t4, D_PAD_0_RIGHT  # Botón "Derecha" (afecta s4, s5)
+    lw t0, D_PAD_0_DOWN   # BotÃ³n "Abajo" (afecta s0, s1)
+    lw t1, D_PAD_0_UP     # BotÃ³n "Arriba" (afecta s0, s1)
+    lw t3, D_PAD_0_LEFT   # BotÃ³n "Izquierda" (afecta s4, s5)
+    lw t4, D_PAD_0_RIGHT  # BotÃ³n "Derecha" (afecta s4, s5)
 
-    # Movimiento en función de los botones presionados
-    bnez t0, moveDown     
+    # Movimiento en funciÃ³n de los botones presionados
+    bnez t0, moveLeft     
     bnez t1, moveUp       
-    bnez t3, moveLeft     
+    bnez t3, moveDown     
     bnez t4, moveRight    
 
     # Continuar en el bucle
@@ -35,80 +35,92 @@ loop:
 
 moveDown:
     jal erasePixel1  
-    addi s0, s0, 1   # Mover hacia abajo el primer píxel
+    addi s0, s0, 1   # Mover hacia abajo el primer pÃ­xel
     bge s0, a2, resetPos1  
     jal drawPixel1
     j loop
 
 moveUp:
     jal erasePixel1
-    addi s0, s0, -1  # Mover hacia arriba el primer píxel
+    addi s0, s0, -1  # Mover hacia arriba el primer pÃ­xel
     blt s0, zero, resetPos1  
     jal drawPixel1
     j loop
 
 moveLeft:
     jal erasePixel2
-    addi s4, s4, 1  # Mover hacia abajo el segundo píxel
+    addi s4, s4, 1  # Mover hacia abajo el segundo pÃ­xel
     bge s4, a2, resetPos2  
     jal drawPixel2
     j loop
 
 moveRight:
     jal erasePixel2
-    addi s4, s4, -1   # Mover a la derecha el segundo píxel
+    addi s4, s4, -1   # Mover a la derecha el segundo pÃ­xel
     bge s4, a2, resetPos2  
     jal drawPixel2
     j loop
 
 erasePixel1:
-    # Borrar píxel en (s0, s1)
+    # Borrar pÃ­xel en (s0, s1)
     mul t2, s0, a1       
     add t2, t2, s1       
-    slli t2, t2, 2       
-    add t2, t2, a0       
+    slli t2, t2, 2    #Desplazamiento        
+    add t2, t2, a0    
     sw s3, 0(t2)         
-    sw s3, 4(t2)
+    sw s3, 140(t2)
+    sw s3, 280(t2)
+    sw s3, 420(t2)
+    sw s3, 560(t2)
     ret
 
 drawPixel1:
-    # Dibujar píxel en (s0, s1)
+    # Dibujar pÃ­xel en (s0, s1)
     mul t2, s0, a1       
     add t2, t2, s1       
     slli t2, t2, 2       
     add t2, t2, a0       
     sw s2, 0(t2)         
-    sw s2, 4(t2)
+    sw s2, 140(t2)
+    sw s2, 280(t2)
+    sw s2, 420(t2)
+    sw s2, 560(t2)
     ret
 
 erasePixel2:
-    # Borrar píxel en (s4, s5)
+    # Borrar pÃ­xel en (s4, s5)
     mul t2, s4, a1       
     add t2, t2, s5       
     slli t2, t2, 2       
     add t2, t2, a0       
     sw s3, 0(t2)         
-    sw s3, 4(t2)
+    sw s3, 140(t2)
+    sw s3, 280(t2)
+    sw s3, 420(t2)
+    sw s3, 560(t2)
     ret
 
 drawPixel2:
-    # Dibujar píxel en (s4, s5)
+    # Dibujar pÃ­xel en (s4, s5)
     mul t2, s4, a1       
     add t2, t2, s5       
     slli t2, t2, 2       
     add t2, t2, a0       
     sw s2, 0(t2)         
-    sw s2, 4(t2)
+    sw s2, 140(t2)
+    sw s2, 280(t2)
+    sw s2, 420(t2)
+    sw s2, 560(t2)
     ret
 
 resetPos1:
-    # Resetear la posición del primer píxel
+    # Resetear la posiciÃ³n del primer pÃ­xel
     li s0, 0
     li s1, 2
     j loop
 
 resetPos2:
-    # Resetear la posición del segundo píxel
+    # Resetear la posiciÃ³n del segundo pÃ­xel
     li s4, 0
     li s5, 4
     j loop
