@@ -86,10 +86,52 @@ loopbola:
     add s8, s8, s6  # X += dir_x
     add s9, s9, s7  # Y += dir_y
 
-    # Rebotar si toca borde horizontal (X)
-    blt s8, zero, punto_Pj2          # Si X < 0
+       # --- Detección de colisión con las barras ---
+    # Colisión con barra izquierda (s1 = columna izquierda, s0 = fila)
+    li t3, 1       # Margen de colisión (ajustable)
+    add t4, s1, t3 # s1 + margen
+    bge s8, s1, check_left_bar  # Si bola_x >= barra_x
+    j check_right_bar
+
+    check_left_bar:
+    ble s8, t4, check_left_y  # Si bola_x <= barra_x + margen
+    j check_right_bar
+
+    check_left_y:
+    # Verificar si la bola está dentro del rango vertical de la barra (altura = 5)
+    bge s9, s0, check_left_y_max  # Si bola_y >= barra_y
+    j check_right_bar
+
+    check_left_y_max:
+    addi t5, s0, 5       # barra_y + altura_barra
+    ble s9, t5, invert_x  # Si bola_y <= barra_y + altura → rebota
+    j check_right_bar
+
+    check_right_bar:
+    # Colisión con barra derecha (s5 = columna derecha, s4 = fila)
+    li t3, 1       # Margen de colisión (ajustable)
+    add t4, s5, t3 # s5 + margen
+    bge s8, s5, check_right_bar_cont
+    j check_bordes
+
+    check_right_bar_cont:
+    ble s8, t4, check_right_y
+    j check_bordes
+
+    check_right_y:
+    bge s9, s4, check_right_y_max
+    j check_bordes
+
+    check_right_y_max:
+    addi t5, s4, 5       # barra_y + altura_barra
+    ble s9, t5, invert_x
+    j check_bordes
+
+    check_bordes:
+    # --- Verificación original de bordes horizontales (puntos) ---
+    blt s8, zero, punto_Pj2          # Si X < 0 → punto jugador 2
     addi t0, a1, -1                 # t0 = columnas - 1
-    bgt s8, t0, punto_Pj1            # Si X > columnas - 1
+    bgt s8, t0, punto_Pj1            # Si X > columnas - 1 → punto jugador 1
 
     # Rebotar si toca borde vertical (Y)
     blt s9, a5, invert_y          # Si Y < 1
@@ -130,31 +172,55 @@ continuar:
 #----------------------------------------------------------
 moveDown:
     jal erasePixel1  
-    addi s0, s0, 1   # Mover hacia abajo el primer p?xel
-    bge s0, a2, resetPos1  
+    addi s0, s0, 1   # Mover hacia abajo el primer píxel
+    li t5, 20        # Límite inferior (ajusta este valor según necesites)
+    bge s0, t5, setBottom1  # Si alcanza el límite, fijar en posición inferior
     jal drawPixel1
-    j loopbola
+    j loopbarra
+
+setBottom1:
+    li s0, 20        # Fijar en posición límite inferior
+    jal drawPixel1
+    j loopbarra
 
 moveUp:
     jal erasePixel1
-    addi s0, s0, -1  # Mover hacia arriba el primer p?xel
-    blt s0, zero, resetPos1  
+    addi s0, s0, -1  # Mover hacia arriba el primer píxel
+    li t5, 0         # Límite superior
+    blt s0, t5, setTop1  # Si alcanza el límite, fijar en posición superior
     jal drawPixel1
-    j loopbola
+    j loopbarra
+
+setTop1:
+    li s0, 0         # Fijar en posición límite superior
+    jal drawPixel1
+    j loopbarra
 
 moveLeft:
     jal erasePixel2
-    addi s4, s4, 1  # Mover hacia abajo el segundo p?xel
-    bge s4, a2, resetPos2  
+    addi s4, s4, 1   # Mover hacia abajo el segundo píxel
+    li t5, 20        # Límite inferior (mismo que para la primera barra)
+    bge s4, t5, setBottom2
     jal drawPixel2
-    j loopbola
+    j loopbarra
+
+setBottom2:
+    li s4, 20        # Fijar en posición límite inferior
+    jal drawPixel2
+    j loopbarra
 
 moveRight:
     jal erasePixel2
-    addi s4, s4, -1   # Mover a la derecha el segundo p?xel
-    bge s4, a2, resetPos2  
+    addi s4, s4, -1  # Mover hacia arriba el segundo píxel
+    li t5, 0         # Límite superior
+    blt s4, t5, setTop2
     jal drawPixel2
-    j loopbola
+    j loopbarra
+
+setTop2:
+    li s4, 0         # Fijar en posición límite superior
+    jal drawPixel2
+    j loopbarra
 
 erasePixel1:
     # Borrar p?xel en (s0, s1)
